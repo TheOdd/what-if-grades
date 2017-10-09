@@ -5,8 +5,19 @@ A chrome extension that allows for hypothetical calculation of grades for assign
 ## Why?
 I made this because a class-mate of mine had said that he wished that a tool existed for our school district's (HISD) grade viewer (GradeSpeed) that allowed him to see what his grade *would* be if he had X grade on X assignment.
 
+## How?
+This extension is made specifically for the HISD GradeSpeed system and will almost certainly not work in any other grade portal. The process that this extension uses is just a series of jQuery selections to hook onto specific parts of the web page such as the grade headers, averages, section headers, etc. From there, it's just a lot of tree traversal to get specific information.
+
+Once all of the information has been gathered, the button element is placed next to each grade element with a click handler. The click handler prompts the user for a new number to replace the grade with. From there, the input is passed down a chain of custom events being triggered. Each event handler calculates a new value and updates the text on the page accordingly.
+
+The process looks something like this:
+<p align="center">
+  <img src="https://raw.githubusercontent.com/TheOdd/what-if-grades/master/imgs/chart.png" />
+</p>
+
 ## Demo GIF
-![example-screencast][2]
+<p align="center">
+  <img src="https://github.com/TheOdd/what-if-grades/blob/master/imgs/demo.gif" />
+</p>
 
 [1]:https://apps.houstonisd.org/ParentStudentConnect/
-[2]:https://github.com/TheOdd/what-if-grades/blob/master/imgs/demo.gif
