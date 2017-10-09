@@ -71,7 +71,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         weightedAvg += (pair[0] * (ratio/100)) * pair[1]; // Calculate the weighted result for each average and add them to the total.
       });
 
-      $('.CurrentAverage').text(`Current Average: ${weightedAvg.toFixed(2)}`); // Finally, set the 'Current Average' text to the newly-calculated average
+      $('.CurrentAverage').text('Current Average: ' + weightedAvg.toFixed(2)); // Finally, set the 'Current Average' text to the newly-calculated average
     });
 
     $('.script-grade').on('grade-change', function() { // Listen for when grades change
