@@ -5,7 +5,37 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     // Create button element to be placed next to each grade
     var button = $('<span/>', {
       text: ' ✍',
-      class: 'edit-grade-button'
+      class: 'edit-grade-button',
+      style: 'cursor: pointer;'
+    });
+
+    var tables = $('table.DataTable').slice(1).children();
+    var addGrade = $('<tr class="DataRow add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>');
+    var addGradeAlt = $('<tr class="DataRowAlt add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>');
+    tables.each(function() {
+      var targetRow = $(this).children().last().prev();
+      if (targetRow.attr('class') === 'DataRow') {
+        targetRow.addClass('script-add-grade-alt');
+      } else {
+        targetRow.addClass('script-add-grade');
+      }
+    });
+    $('.script-add-grade-alt').after(addGradeAlt).removeClass('script-add-grade-alt');
+    $('.script-add-grade').after(addGrade).removeClass('script-add-grade');
+
+    $('.script-add-grade-button').click(function(e) {
+      e.preventDefault();
+      var myButton = button.clone();
+      var currentRow = $(this).parent().parent();
+      var assignmentName = prompt('Assignment name.');
+      var row = $('<tr class="DataRow"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>');
+      var rowAlt = $('<tr class="DataRowAlt"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>');
+      if (currentRow.attr('class').match(/(DataRow\b|DataRowAlt\b)/)[0] === 'DataRow') {
+        currentRow.removeClass('DataRow').addClass('DataRowAlt').before(row).prev().children('.script-grade').after(myButton);
+      } else {
+        currentRow.removeClass('DataRowAlt').addClass('DataRow').before(rowAlt).prev().children('.script-grade').after(myButton);
+      }
+      currentRow.prev().children('.script-grade').next().trigger('click');
     });
 
     // 'AssignmentGrade' is a class attached to all grade elements on the page, including the headers titled 'Grade'
@@ -29,10 +59,9 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     }).addClass('script-avg'); // Assign all remaining elements a class so it could be easily referenced later
 
     $('.script-grade').after(button); // Add the button next to every grade that we tagged earlier
+    $('.edit-grade-button').next().next().remove() // Remove extra indentation, as button replaced it
 
-    $('.edit-grade-button').css('cursor', 'pointer'); // Changes cursor to 'clicking hand' when hovering over buttons
-
-    $('.script-avg').on('avg-change', function() { // Listen for when the averages change
+    $(document).on('avg-change', '.script-avg', function() { // Listen for when the averages change
       var calcArr = []; // Create empty array that will be populated later w/ [weight, avg] pairs
       var weightArr = $('.CategoryName').contents(); // Base selection of weights
       var avgArr = $('.script-avg').contents(); // Base selection of averages
@@ -74,7 +103,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       $('.CurrentAverage').text('Current Average: ' + weightedAvg.toFixed(2)); // Finally, set the 'Current Average' text to the newly-calculated average
     });
 
-    $('.script-grade').on('grade-change', function() { // Listen for when grades change
+    $(document).on('grade-change', '.script-grade', function() { // Listen for when grades change
       var avg = $(this).closest('tbody').find('.script-avg'); // Find closest average
       var gradeArr = $(this).closest('tbody').children().children('.script-grade').contents(); // Get array of all grades in current section
 
@@ -92,7 +121,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       avg.trigger('avg-change'); // Trigger the average change event
     });
 
-    $('.edit-grade-button').click(function() { // Listen for when the edit buttons are clicked
+    $(document).on('click', '.edit-grade-button', function() { // Listen for when the edit buttons are clicked
       var grade = $(this).prev(); // Get the grade associated with the clicked button
       var newGrade = Number(prompt('New value')); // Prompt user for new value
       while (isNaN(newGrade)) { // Re-Prompt until user enters valid number
