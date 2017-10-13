@@ -9,33 +9,34 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       style: 'cursor: pointer;'
     });
 
-    var tables = $('table.DataTable').slice(1).children();
-    var addGrade = $('<tr class="DataRow add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>');
-    var addGradeAlt = $('<tr class="DataRowAlt add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>');
-    tables.each(function() {
-      var targetRow = $(this).children().last().prev();
-      if (targetRow.attr('class') === 'DataRow') {
-        targetRow.addClass('script-add-grade-alt');
+    var tables = $('table.DataTable').slice(1).children(); // Get all data tables (aka grade sections)
+    var addGrade = $('<tr class="DataRow add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>'); // Create row elements for buttons
+    var addGradeAlt = $('<tr class="DataRowAlt add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>'); // Create row elements for buttons
+    tables.each(function() { // Add the 'add new grade' button to each section at the bottom
+      var targetRow = $(this).children().last().prev(); // Get last row from current table
+      if (targetRow.attr('class') === 'DataRow') { // Check if either alt style or regular style
+        targetRow.addClass('script-add-grade-alt'); // Based on condition, add appropriate style
       } else {
-        targetRow.addClass('script-add-grade');
+        targetRow.addClass('script-add-grade'); // Based on condition, add appropriate style
       }
     });
-    $('.script-add-grade-alt').after(addGradeAlt).removeClass('script-add-grade-alt');
-    $('.script-add-grade').after(addGrade).removeClass('script-add-grade');
+    $('.script-add-grade-alt').after(addGradeAlt).removeClass('script-add-grade-alt'); // For whatever reason, trying to add the addGrade elements
+    $('.script-add-grade').after(addGrade).removeClass('script-add-grade'); // after the targetrow while in the loop did not work, but this did.
 
     $('.script-add-grade-button').click(function(e) {
-      e.preventDefault();
-      var myButton = button.clone();
-      var currentRow = $(this).parent().parent();
-      var assignmentName = prompt('Assignment name.');
-      var row = $('<tr class="DataRow"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>');
-      var rowAlt = $('<tr class="DataRowAlt"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>');
-      if (currentRow.attr('class').match(/(DataRow\b|DataRowAlt\b)/)[0] === 'DataRow') {
-        currentRow.removeClass('DataRow').addClass('DataRowAlt').before(row).prev().children('.script-grade').after(myButton);
+      e.preventDefault(); // Prevent default action (redirection)
+      var myButton = button.clone(); // Normally, you can only assign an element once. That can be to multiple targets, but I can't do it just once in this case,
+                                     // so I make a copy of the element after each click in order to make a unique element for that click to be assigned
+      var currentRow = $(this).parent().parent(); // Get two parents above in order to get actual row element
+      var assignmentName = prompt('Assignment name.'); // Prompt user for assignment name and store it in a variable
+      var row = $('<tr class="DataRow"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>'); // Create element to be placed as new grade row
+      var rowAlt = $('<tr class="DataRowAlt"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>'); // Create element to be placed as new grade row
+      if (currentRow.attr('class').match(/(DataRow\b|DataRowAlt\b)/)[0] === 'DataRow') { // Match regex pattern for either DataRow or DataRowAlt
+        currentRow.removeClass('DataRow').addClass('DataRowAlt').before(row).prev().children('.script-grade').after(myButton); // Invert data row CSS and add button next to new grade
       } else {
-        currentRow.removeClass('DataRowAlt').addClass('DataRow').before(rowAlt).prev().children('.script-grade').after(myButton);
+        currentRow.removeClass('DataRowAlt').addClass('DataRow').before(rowAlt).prev().children('.script-grade').after(myButton); // Invert data row CSS and add button next to new grade
       }
-      currentRow.prev().children('.script-grade').next().trigger('click');
+      currentRow.prev().children('.script-grade').next().trigger('click'); // Initiate the click event handler to trigger chain of events to handle new grades
     });
 
     // 'AssignmentGrade' is a class attached to all grade elements on the page, including the headers titled 'Grade'
