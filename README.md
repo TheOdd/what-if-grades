@@ -17,7 +17,10 @@ The process looks something like this:
 
 ## Demo GIF
 <p align="center">
-  <img src="https://github.com/TheOdd/what-if-grades/blob/master/imgs/demo.gif" />
+  <details>
+    <summary>Click to see demo gif</summary>
+    <img src="https://github.com/TheOdd/what-if-grades/blob/master/imgs/demo.gif" />
+  </details>
 </p>
 
 [1]:https://apps.houstonisd.org/ParentStudentConnect/
