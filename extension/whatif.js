@@ -12,7 +12,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     var tables = $('table.DataTable').slice(1).children(); // Get all data tables (aka grade sections)
     var addGrade = $('<tr class="DataRow add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>'); // Create row elements for buttons
     var addGradeAlt = $('<tr class="DataRowAlt add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>'); // Create row elements for buttons
-    tables.each(function() { // Add the 'add new grade' button to each section at the bottom
+    tables.each(function addButton() { // Add the 'add new grade' button to each section at the bottom
       var targetRow = $(this).children().last().prev(); // Get last row from current table
       if (targetRow.attr('class') === 'DataRow') { // Check if either alt style or regular style
         targetRow.addClass('script-add-grade-alt'); // Based on condition, add appropriate style
@@ -23,7 +23,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     $('.script-add-grade-alt').after(addGradeAlt).removeClass('script-add-grade-alt'); // For whatever reason, trying to add the addGrade elements
     $('.script-add-grade').after(addGrade).removeClass('script-add-grade'); // after the targetrow while in the loop did not work, but this did.
 
-    $('.script-add-grade-button').click(function(e) {
+    $('.script-add-grade-button').click(function clickHandler(e) {
       e.preventDefault(); // Prevent default action (redirection)
       var myButton = button.clone(); // Normally, you can only assign an element once. That can be to multiple targets, but I can't do it just once in this case,
                                      // so I make a copy of the element after each click in order to make a unique element for that click to be assigned
@@ -40,7 +40,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     });
 
     // 'AssignmentGrade' is a class attached to all grade elements on the page, including the headers titled 'Grade'
-    $('.AssignmentGrade').filter(function(index, elem) {
+    $('.AssignmentGrade').filter(function removeHeaders(index, elem) {
       return $(this).text() !== 'Grade'; // Exclude headers from jQuery selection result
     }).addClass('script-grade'); // Assign all remaining elements a class so it could be easily referenced later
 
@@ -55,14 +55,14 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
 
     .children() // The children of those elements are just 4 elements. 2 of them are strange blank characters (not spaces, which is weird), 1 of them
                 // is the title of 'Average', and the last is the actual average.
-    .filter(function(index, elem) {
+    .filter(function filterOnlyAvg(index, elem) {
       return $(this).text() !== " " && $(this).text() !== "Average"; // Filter out to only get the actual averages
     }).addClass('script-avg'); // Assign all remaining elements a class so it could be easily referenced later
 
     $('.script-grade').after(button); // Add the button next to every grade that we tagged earlier
     $('.edit-grade-button').next().next().remove() // Remove extra indentation, as button replaced it
 
-    $(document).on('avg-change', '.script-avg', function() { // Listen for when the averages change
+    $(document).on('avg-change', '.script-avg', function handleAvgChange() { // Listen for when the averages change
       var calcArr = []; // Create empty array that will be populated later w/ [weight, avg] pairs
       var weightArr = $('.CategoryName').contents(); // Base selection of weights
       var avgArr = $('.script-avg').contents(); // Base selection of averages
@@ -72,7 +72,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       // If there is only one weight, then it's automatically 100%, so check.
 
       if (weightArr.length > 1) {
-        weightArr = weightArr.map(function(weightStr) {
+        weightArr = weightArr.map(function parseWeight(weightStr) {
           var txt = $(weightStr).text(); // Since each element in the array is an HTML element, we parse it with the jQuery wrapper
           return parseInt(txt.slice(txt.length - 3, txt.length - 1)); // We then slice the string to be only the percent number at the end and parse it as an integer.
         });
@@ -81,7 +81,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       }
 
       avgArr = Array.from(avgArr); // Repeat same process as above w/ averages
-      avgArr = avgArr.map(function(avgStr) {
+      avgArr = avgArr.map(function parseAvg(avgStr) {
         var txt = $(avgStr).text();
         return parseFloat(txt); // Just parse each element's text as a float, not an int
       });
@@ -97,24 +97,24 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
 
       var weightedAvg = 0; // Create variable for the new overall class average based on changed numbers
       var ratio = 100 / totalWeight; // Calculate ratio - 100% over the total weight present
-      calcArr.forEach(function(pair) {
+      calcArr.forEach(function sumWeightedAvg(pair) {
         weightedAvg += (pair[0] * (ratio/100)) * pair[1]; // Calculate the weighted result for each average and add them to the total.
       });
 
       $('.CurrentAverage').text('Current Average: ' + weightedAvg.toFixed(2)); // Finally, set the 'Current Average' text to the newly-calculated average
     });
 
-    $(document).on('grade-change', '.script-grade', function() { // Listen for when grades change
+    $(document).on('grade-change', '.script-grade', function handleGradeChange() { // Listen for when grades change
       var avg = $(this).closest('tbody').find('.script-avg'); // Find closest average
       var gradeArr = $(this).closest('tbody').children().children('.script-grade').contents(); // Get array of all grades in current section
 
       gradeArr = Array.from(gradeArr); // Same process as with the weightArr above
-      gradeArr = gradeArr.map(function(gradeStr) {
+      gradeArr = gradeArr.map(function parseGrades(gradeStr) {
         return parseInt($(gradeStr).text()); // Parse the text into a float
       });
 
       var newAvg = 0; // Make variable to store newly-calculated average
-      gradeArr.forEach(function(grade) {
+      gradeArr.forEach(function sumGrades(grade) {
         newAvg += grade; // Add all grades together from array
       });
       newAvg /= gradeArr.length; // Divide total by number of grades to get average
@@ -122,7 +122,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       avg.trigger('avg-change'); // Trigger the average change event
     });
 
-    $(document).on('click', '.edit-grade-button', function() { // Listen for when the edit buttons are clicked
+    $(document).on('click', '.edit-grade-button', function handleBtnClick() { // Listen for when the edit buttons are clicked
       var grade = $(this).prev(); // Get the grade associated with the clicked button
       var newGrade = Number(prompt('New value')); // Prompt user for new value
       while (isNaN(newGrade)) { // Re-Prompt until user enters valid number
@@ -138,7 +138,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
   // is inside an iFrame, which we can't access due to security restrictions. Luckily, the iFrame source is just a link to another page,
   // so just redirect them to that actual page and everything will be loaded as normal without being wrapped in an iFrame container.
 
-  $(document).ready(function() {
+  $(document).ready(function changeLink() {
     $('#ctl00_ln_close').text("Open 'what if' grade viewer"); // Set the text of the 'Close GradeBook' link (which is never used) to open grades page in standalone tab
     $('#ctl00_ln_close').attr('href', 'https://parent.gradebook.houstonisd.org/pc/ParentStudentGrades.aspx'); // Set to proper link
   });
