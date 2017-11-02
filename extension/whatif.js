@@ -41,7 +41,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
 
     // 'AssignmentGrade' is a class attached to all grade elements on the page, including the headers titled 'Grade'
     $('.AssignmentGrade').filter(function removeHeaders(index, elem) {
-      return $(this).text() !== 'Grade'; // Exclude headers from jQuery selection result
+      return $(this).text() !== 'Grade' && $(this).text() !== 'Exc'; // Exclude headers from jQuery selection result
     }).addClass('script-grade'); // Assign all remaining elements a class so it could be easily referenced later
 
     // Pretty much some magic numbers here, but they should stay consistent with the way that the gradebook is layed out.
