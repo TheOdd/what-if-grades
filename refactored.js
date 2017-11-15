@@ -11,8 +11,10 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     const addGradeAlt = $('<tr class="DataRowAlt add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>')
     tables.each(function addButton() {
       const targetRow = $(this).children().last().prev()
-      targetRow.attr('class') === 'DataRow' ?
-      targetRow.addClass('script-add-grade-alt') : targetRow.addClass('script-add-grade')
+      if (targetRow.attr('class') === 'DataRow')
+        targetRow.addClass('script-add-grade-alt')
+      else
+        targetRow.addClass('script-add-grade')
     })
     $('.script-add-grade-alt').after(addGradeAlt).removeClass('script-add-grade-alt')
     $('.script-add-grade').after(addGrade).removeClass('script-add-grade')
@@ -49,7 +51,9 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     $(document).on('avg-change', '.script-avg', () => {
       const calcArr = []
       let weightArr = Array.from($('.CategoryName').contents())
-      let avgArr = Array.from($('.script-avg').contents())
+      let avgArr = Array.from($('.script-avg').contents()).map(str => (
+        parseFloat($(str).text())
+      ))
 
       if (weightArr.length > 1) {
         weightArr = weightArr.map(weightStr => {
@@ -60,8 +64,10 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         weightArr = [100]
       }
 
-      weightArr.filter(e => !isNaN(e)).forEach((e, i) => {
-        calcArr.push([weightArr[i], avgArr[i]])
+      let totalWeight = 0
+
+      avgArr.filter(e => !isNaN(e)).forEach((e, i) => {
+        calcArr.push([weightArr[i], e])
         totalWeight += weightArr[i]
       })
 
@@ -71,14 +77,14 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         weightedAvg += (pair[0] * (ratio/100)) * pair[1]
       })
 
-      $('.CurrentAverage').text('Current Average: ' + weightAvg.toFixed(2))
+      $('.CurrentAverage').text('Current Average: ' + weightedAvg.toFixed(2))
     })
 
     $(document).on('grade-change', '.script-grade', function handleGradeChange() {
       const avg = $(this).closest('tbody').find('.script-avg')
       const gradeArr = Array.from(
         $(this).closest('tbody').children().children('.script-grade').contents()
-      ).map(gradeStr => parseInt($(gradeStr).text()))
+      ).map(gradeStr => parseFloat($(gradeStr).text()))
 
       let newAvg = 0
       gradeArr.forEach(grade => newAvg += grade)
