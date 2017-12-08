@@ -7,29 +7,57 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
     })
 
     const tables = $('table.DataTable').slice(1).children()
-    const addGrade = $('<tr class="DataRow add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>')
-    const addGradeAlt = $('<tr class="DataRowAlt add-grade-row"><td class="AssignmentName"><button class="script-add-grade-button">Add new grade</button></td><td class="DateAssigned">&nbsp;</td><td class="DateDue">&nbsp;</td><td class="script-placeholder">&nbsp;</td><td class="AssignmentNote">&nbsp;</td><td>&nbsp;</td></tr>')
+    const generateGradeRow = style => (
+      `
+      <tr class="${style} add-grade-row">
+        <td class="AssignmentName">
+          <button class="script-add-grade-button">Add new grade</button>
+        </td>
+        <td class="DateAssigned">&nbsp;</td>
+        <td class="DateDue">&nbsp;</td>
+        <td class="script-placeholder">&nbsp;</td>
+        <td class="AssignmentNote">&nbsp;</td>
+        <td>&nbsp;</td>
+       </tr>
+      `
+    )
     tables.each(function addButton() {
       const targetRow = $(this).children().last().prev()
-      if (targetRow.attr('class') === 'DataRow')
-        targetRow.addClass('script-add-grade-alt')
-      else
-        targetRow.addClass('script-add-grade')
+      targetRow.addClass(
+        targetRow.attr('class') === 'DataRow' ? 'script-add-grade-alt' : 'script-add-grade'
+      )
     })
-    $('.script-add-grade-alt').after(addGradeAlt).removeClass('script-add-grade-alt')
-    $('.script-add-grade').after(addGrade).removeClass('script-add-grade')
+    $('.script-add-grade-alt').after(generateGradeRow('DataRow')).removeClass('script-add-grade-alt')
+    $('.script-add-grade').after(generateGradeRow('DataRowAlt')).removeClass('script-add-grade')
 
     $('.script-add-grade-button').click(function clickHandler(e) {
       e.preventDefault()
       const myButton = button.clone()
       const currentRow = $(this).parent().parent()
       const assignmentName = prompt('Assignment name.')
-      const row = $('<tr class="DataRow"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>')
-      const rowAlt = $('<tr class="DataRowAlt"><td class="AssignmentName">' + assignmentName + '</td><td class="DateAssigned">N/A</td><td class="DateDue">N/A</td><td class="AssignmentGrade script-grade">' + 0 + '</td><td class="AssignmentNote"></td></tr>')
+      const generateNewRow = style => (
+        `
+        <tr class="${style}">
+          <td class="AssignmentName">${assignmentName}</td>
+          <td class="DateAssigned">N/A</td>
+          <td class="DateDue">N/A</td>
+          <td class="AssignmentGrade script-grade">0</td>
+          <td class="AssignmentNote"></td>
+        </tr>
+        `
+      )
+      const addNewGradeToDOM = style => {
+        currentRow.removeClass(style)
+        .addClass(style === 'DataRow' ? 'DataRowAlt' : 'DataRow')
+        .before(generateNewRow(style))
+        .prev()
+        .children('.script-grade')
+        .after(myButton)
+      }
       if (currentRow.attr('class').match(/(DataRow\b|DataRowAlt\b)/)[0] === 'DataRow')
-        currentRow.removeClass('DataRow').addClass('DataRowAlt').before(row).prev().children('.script-grade').after(myButton)
+        addNewGradeToDOM('DataRow')
       else
-        currentRow.removeClass('DataRowAlt').addClass('DataRow').before(rowAlt).prev().children('.script-grade').after(myButton)
+        addNewGradeToDOM('DataRowAlt')
       currentRow.prev().children('.script-grade').next().trigger('click')
     })
 
@@ -60,9 +88,8 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
           const txt = $(weightStr).text()
           return parseInt(txt.slice(txt.length - 3, txt.length - 1))
         })
-      } else {
+      } else
         weightArr = [100]
-      }
 
       let totalWeight = 0
 
@@ -74,7 +101,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       let weightedAvg = 0
       const ratio = 100 / totalWeight
       calcArr.forEach(pair => {
-        weightedAvg += (pair[0] * (ratio/100)) * pair[1]
+        weightedAvg += (pair[0] * (ratio / 100)) * pair[1]
       })
 
       $('.CurrentAverage').text('Current Average: ' + weightedAvg.toFixed(2))
@@ -86,8 +113,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         $(this).closest('tbody').children().children('.script-grade').contents()
       ).map(gradeStr => parseFloat($(gradeStr).text()))
 
-      let newAvg = 0
-      gradeArr.forEach(grade => newAvg += grade)
+      let newAvg = gradeArr.reduce((a, b) => a + b, 0)
       newAvg /= gradeArr.length
       avg.text(newAvg.toFixed(2))
       avg.trigger('avg-change')
