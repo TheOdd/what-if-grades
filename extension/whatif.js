@@ -1,8 +1,14 @@
 if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/GradeSpeed.aspx') {
   $(document).ready(() => {
-    const button = $('<span/>', {
+    const editGradeButton = $('<span/>', {
       text: ' ✍',
       class: 'edit-grade-button',
+      style: 'cursor: pointer;'
+    })
+
+    const deleteGradeButton = $('<span/>', {
+      text: ' ❌',
+      class: 'delete-grade-button',
       style: 'cursor: pointer;'
     })
 
@@ -18,13 +24,13 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         <td class="script-placeholder">&nbsp;</td>
         <td class="AssignmentNote">&nbsp;</td>
         <td>&nbsp;</td>
-       </tr>
+      </tr>
       `
     )
     tables.each(function addButton() {
       const targetRow = $(this).children().last().prev()
       targetRow.addClass(
-        targetRow.attr('class') === 'DataRow' ? 'script-add-grade-alt' : 'script-add-grade'
+        targetRow.attr('class') === 'DataRow' ? 'script-add-grade' : 'script-add-grade-alt'
       )
     })
     $('.script-add-grade-alt').after(generateGradeRow('DataRow')).removeClass('script-add-grade-alt')
@@ -32,7 +38,6 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
 
     $('.script-add-grade-button').click(function clickHandler(e) {
       e.preventDefault()
-      const myButton = button.clone()
       const currentRow = $(this).parent().parent()
       const assignmentName = prompt('Assignment name.')
       const generateNewRow = style => (
@@ -52,7 +57,9 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         .before(generateNewRow(style))
         .prev()
         .children('.script-grade')
-        .after(myButton)
+        .after(editGradeButton.clone())
+
+        currentRow.prev().children().first().prepend(deleteGradeButton.clone())
       }
       if (currentRow.attr('class').match(/(DataRow\b|DataRowAlt\b)/)[0] === 'DataRow')
         addNewGradeToDOM('DataRow')
@@ -65,6 +72,11 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       return $(this).text() !== 'Grade' && $(this).text() !== 'Exc'
     }).addClass('script-grade')
 
+    $('.script-grade').each(function addDeleteButtons() {
+      const nameElem = $(this).prev().prev().prev()
+      nameElem.prepend(deleteGradeButton.clone())
+    })
+
     $('tbody')
     .slice(2)
     .children('tr:not([class])')
@@ -73,7 +85,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       return $(this).text() !== ' ' && $(this).text() !== 'Average'
     }).addClass('script-avg')
 
-    $('.script-grade').after(button)
+    $('.script-grade').after(editGradeButton)
     $('.edit-grade-button').next().next().remove()
 
     $(document).on('avg-change', '.script-avg', () => {
@@ -93,9 +105,11 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
 
       let totalWeight = 0
 
-      avgArr.filter(e => !isNaN(e)).forEach((e, i) => {
-        calcArr.push([weightArr[i], e])
-        totalWeight += weightArr[i]
+      avgArr.forEach((e, i) => {
+        if (!isNaN(e)) {
+          calcArr.push([weightArr[i], e])
+          totalWeight += weightArr[i]
+        }
       })
 
       let weightedAvg = 0
@@ -104,14 +118,19 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         weightedAvg += (pair[0] * (ratio / 100)) * pair[1]
       })
 
-      $('.CurrentAverage').text('Current Average: ' + weightedAvg.toFixed(2))
+      $('.CurrentAverage').text('Current Average: ' + Math.ceil(weightedAvg))
     })
 
     $(document).on('grade-change', '.script-grade', function handleGradeChange() {
       const avg = $(this).closest('tbody').find('.script-avg')
       const gradeArr = Array.from(
         $(this).closest('tbody').children().children('.script-grade').contents()
-      ).map(gradeStr => parseFloat($(gradeStr).text()))
+      ).map(gradeStr => {
+        if ($(gradeStr).text() === 'mis') return 0
+        
+        else
+          return parseFloat($(gradeStr).text())
+      })
 
       let newAvg = gradeArr.reduce((a, b) => a + b, 0)
       newAvg /= gradeArr.length
@@ -119,7 +138,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       avg.trigger('avg-change')
     })
 
-    $(document).on('click', '.edit-grade-button', function handleBtnClick() {
+    $(document).on('click', '.edit-grade-button', function handleEditClick() {
       const grade = $(this).prev()
       let newGrade = Number(prompt('New value'))
       while (isNaN(newGrade)) {
@@ -127,6 +146,22 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       }
       grade.text(newGrade)
       grade.trigger('grade-change')
+    })
+
+    $(document).on('click', '.delete-grade-button', function handleDeleteClick() {
+      const rowBefore = $(this).parent().parent().prev().children('.script-grade')
+      const rowAfter = $(this).parent().parent().next().children('.script-grade')
+      if ($(this).parent().parent().parent().children().length === 4) {
+        $(this).parent().parent().parent().children().last().children('.script-avg').first().text('--')
+        $(this).parent().parent().remove()
+        $('.script-avg').first().trigger('avg-change')
+      } else if ($(this).parent().parent().prev().children().first().text() !== 'Assignment') {
+        $(this).parent().parent().remove()
+        rowBefore.trigger('grade-change')
+      } else {
+        $(this).parent().parent().remove()
+        rowAfter.trigger('grade-change')
+      }
     })
   })
 } else {
