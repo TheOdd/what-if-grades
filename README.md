@@ -1,4 +1,8 @@
 # What-If-Grades
+## Installation
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/what-if-gradespeed/)
+- [Chrome](https://chrome.google.com/webstore/detail/what-if-gradespeed/efmdcdlehpakgjdedjimhiojdjebenlj)
+
 ## What is it?
 A chrome extension that allows for hypothetical calculation of grades for assignments in HISD's GradeSpeed portal. While visiting the [HISD GradeSpeed Portal][1], you'll be able to open a link to the grade viewer. From that page, any specific class that is opened will have a ✍ button inserted next to each assignment grade space. Click the button to edit the corresponding grade's value and both the average for that section as well as the whole class will change accordingly. This also takes the different section's weights on the overall average. (i.e. homework - 10%)
 
