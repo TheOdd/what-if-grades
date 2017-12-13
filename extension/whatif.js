@@ -118,7 +118,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         weightedAvg += (pair[0] * (ratio / 100)) * pair[1]
       })
 
-      $('.CurrentAverage').text('Current Average: ' + Math.ceil(weightedAvg))
+      $('.CurrentAverage').text('Current Average: ' + Math.round(weightedAvg))
     })
 
     $(document).on('grade-change', '.script-grade', function handleGradeChange() {
