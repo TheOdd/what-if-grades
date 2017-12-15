@@ -6,9 +6,18 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       style: 'cursor: pointer;'
     })
 
-    const editFinalButton = $('<span/>', {
+    // TODO: Actually make the edit final buttons and click handlers into one button and function. Probably a generator that
+    // takes an argument to return either one for semester 1 or 2.
+
+    const editFinalOneButton = $('<span/>', {
       text: ' ✍',
-      class: 'edit-final-button',
+      class: 'edit-final-1-button',
+      style: 'cursor: pointer;'
+    })
+
+    const editFinalTwoButton = $('<span/>', {
+      text: ' ✍',
+      class: 'edit-final-2-button',
       style: 'cursor: pointer;'
     })
 
@@ -41,14 +50,41 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       )
     })
 
-    mainTable.each(function addFinal() {
+    mainTable.each(function addFinalOne() {
       const finalElem = $($(this).children()[7])
       if (finalElem.text().charCodeAt(0) === 160)
         finalElem.text('')
-      finalElem.append(editFinalButton.clone())      
+      finalElem.append(editFinalOneButton.clone())      
     })
 
-    $(document).on('click', '.edit-final-button', function handleFinalAddition() {
+    mainTable.each(function addFinalTwo() {
+      const finalElem = $($(this).children()[12])
+      if (finalElem.text().charCodeAt(0) === 160)
+        finalElem.text('')
+      finalElem.append(editFinalTwoButton.clone())
+    })
+
+    $(document).on('click', '.edit-final-2-button', function handleFinalTwoAddition() {
+      const curRow = $(this).parent().parent()
+      const c4 = $(curRow.children()[9])
+      const c5 = $(curRow.children()[10])
+      const c6 = $(curRow.children()[11])
+      const sem2 = $(curRow.children()[13])
+      const validGrades = [c4.text(), c5.text(), c6.text()].filter(s => s.charCodeAt(0) !== 160)
+      const numOfGrades = validGrades.length
+      let newGrade = Number(prompt('New value'))
+      while (isNaN(newGrade)) {
+        newGrade = Number(prompt('New value'))
+      }
+      if ($(this).parent().text().length > 2)
+        $(this).parent().text(newGrade).append(editFinalTwoButton.clone())
+      else
+        $(this).before(newGrade)
+      const newSemGrade = (validGrades.map(n => parseInt(n)).reduce((a, b) => a + b, 0) + parseInt(newGrade)) / (numOfGrades + 1)
+      sem2.text(Math.round(newSemGrade))
+    })
+
+    $(document).on('click', '.edit-final-1-button', function handleFinalOneAddition() {
       const curRow = $(this).parent().parent()
       const c1 = $(curRow.children()[4])
       const c2 = $(curRow.children()[5])
@@ -61,7 +97,7 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         newGrade = Number(prompt('New value'))
       }
       if ($(this).parent().text().length > 2)
-        $(this).parent().text(newGrade).append(editFinalButton.clone())
+        $(this).parent().text(newGrade).append(editFinalOneButton.clone())
       else
         $(this).before(newGrade)
       const newSemGrade = (validGrades.map(n => parseInt(n)).reduce((a, b) => a + b, 0) + parseInt(newGrade)) / (numOfGrades + 1)
