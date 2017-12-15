@@ -6,12 +6,19 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
       style: 'cursor: pointer;'
     })
 
+    const editFinalButton = $('<span/>', {
+      text: ' ✍',
+      class: 'edit-final-button',
+      style: 'cursor: pointer;'
+    })
+
     const deleteGradeButton = $('<span/>', {
       text: ' ❌',
       class: 'delete-grade-button',
       style: 'cursor: pointer;'
     })
 
+    const mainTable = $('table.DataTable').children().children().slice(1)
     const tables = $('table.DataTable').slice(1).children()
     const generateGradeRow = style => (
       `
@@ -33,6 +40,34 @@ if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/G
         targetRow.attr('class') === 'DataRow' ? 'script-add-grade' : 'script-add-grade-alt'
       )
     })
+
+    mainTable.each(function addFinal() {
+      const finalElem = $($(this).children()[7])
+      if (finalElem.text().charCodeAt(0) === 160)
+        finalElem.text('')
+      finalElem.append(editFinalButton.clone())      
+    })
+
+    $(document).on('click', '.edit-final-button', function handleFinalAddition() {
+      const curRow = $(this).parent().parent()
+      const c1 = $(curRow.children()[4])
+      const c2 = $(curRow.children()[5])
+      const c3 = $(curRow.children()[6])
+      const sem1 = $(curRow.children()[8])
+      const validGrades = [c1.text(), c2.text(), c3.text()].filter(s => s.charCodeAt(0) !== 160)
+      const numOfGrades = validGrades.length
+      let newGrade = Number(prompt('New value'))
+      while (isNaN(newGrade)) {
+        newGrade = Number(prompt('New value'))
+      }
+      if ($(this).parent().text().length > 2)
+        $(this).parent().text(newGrade).append(editFinalButton.clone())
+      else
+        $(this).before(newGrade)
+      const newSemGrade = (validGrades.map(n => parseInt(n)).reduce((a, b) => a + b, 0) + parseInt(newGrade)) / (numOfGrades + 1)
+      sem1.text(Math.round(newSemGrade))
+    })
+
     $('.script-add-grade-alt').after(generateGradeRow('DataRow')).removeClass('script-add-grade-alt')
     $('.script-add-grade').after(generateGradeRow('DataRowAlt')).removeClass('script-add-grade')
 
