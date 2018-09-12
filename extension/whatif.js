@@ -1,4 +1,4 @@
-if (window.location.href !== 'https://apps.houstonisd.org/ParentStudentConnect/GradeSpeed.aspx') {
+if (window.location.href !== 'https://publicapps.houstonisd.org/ParentStudentConnect/GradeSpeed.aspx') {
   $(document).ready(() => {
     const editGradeButton = $('<span/>', {
       text: ' ✍',
